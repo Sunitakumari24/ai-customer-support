@@ -53,6 +53,26 @@ exports.signup = async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
+    
+    // Handle validation errors
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors)
+        .map(err => err.message)
+        .join(", ");
+      return res.status(400).json({
+        success: false,
+        message: messages || "Validation error",
+      });
+    }
+
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Server error during signup",

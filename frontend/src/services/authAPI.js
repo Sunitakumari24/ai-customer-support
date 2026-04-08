@@ -4,6 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 // ================= SIGNUP =================
 export const signupUser = async (userData) => {
   try {
+    console.log("Calling signup API with:", userData);
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
       headers: {
@@ -12,10 +13,12 @@ export const signupUser = async (userData) => {
       body: JSON.stringify(userData),
     });
 
+    console.log("Signup response status:", response.status);
     const data = await response.json();
+    console.log("Signup response data:", data);
 
     if (!response.ok) {
-      throw new Error(data.message || "Signup failed");
+      throw new Error(data.message || data.error || "Signup failed");
     }
 
     return data;
@@ -36,12 +39,12 @@ export const loginUser = async (credentials) => {
       body: JSON.stringify(credentials),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.message || "Login failed");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Login failed");
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error("Login error:", error);
@@ -60,12 +63,12 @@ export const getUserProfile = async (token) => {
       },
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      throw new Error(data.message || "Failed to get profile");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to get profile");
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error("Profile error:", error);
